@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "684473673095",
+    "project_id": "signin-df45a",
+    "storage_bucket": "signin-df45a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684473673095:android:ae70c90c582790fbc21f22",
+        "android_client_info": {
+          "package_name": "com.example.tired"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOQiSr0fo7k36HldoaJ2J97Km0t3UBe3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
