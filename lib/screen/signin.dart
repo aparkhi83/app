@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tired/landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -254,8 +255,27 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _rollNoController = TextEditingController();
+  final TextEditingController _phoneNoController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+  String? _yearController;
+  String? _sigController;
   bool _isLoading = false;
+  final List<String> _cat=["2027","2026","2025","2024"];
+  final List<String> _categories = ["Catalyst", "Charge", "Chronicle","Clutch","Concrete","Create","Credit","Crypt"];
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1995), // Set earliest date
+      lastDate: DateTime.now(), // Set latest date
+    );
 
+    if (pickedDate != null) {
+      setState(() {
+        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate); // Format date
+      });
+    }
+  }
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -270,6 +290,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             .update({
           'name': _nameController.text.trim(),
           'rollNo': _rollNoController.text.trim(),
+          'dob': _dateController.text.trim(),
+          'phone': _phoneNoController.text.trim(),
+          'year': _yearController,
+          'sig': _sigController,
         });
 
         if (!mounted) return;
@@ -289,8 +313,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return SingleChildScrollView(
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Form(
@@ -329,6 +353,74 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _phoneNoController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your roll number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select your SIG",
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _sigController,
+                  items: _categories.map((String sig) {
+                    return DropdownMenuItem<String>(
+                      value: sig,
+                      child: Text(sig),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _sigController = newValue;
+                    });
+                  },
+                  validator: (value) => value == null ? 'Select' : null,
+                ),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select your year of graduation",
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _yearController,
+                  items: _cat.map((String year) {
+                    return DropdownMenuItem<String>(
+                      value: year,
+                      child: Text(year),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _yearController = newValue;
+                    });
+                  },
+                  validator: (value) => value == null ? 'Select' : null,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _dateController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: "Date of Birth",
+                    border: OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
+                    ),
+                  ),
+                  validator: (value) => value == null || value.isEmpty ? 'Please select your date of birth' : null,
                 ),
                 const SizedBox(height: 30),
                 ElevatedButton(

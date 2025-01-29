@@ -693,6 +693,7 @@ class ProfilePage extends StatelessWidget {
         title: const Text('Profile'),
       ),
       body: StreamBuilder<DocumentSnapshot>(
+
         stream: FirebaseFirestore.instance
             .collection('users')
             .doc(currentUser?.uid)
@@ -708,7 +709,7 @@ class ProfilePage extends StatelessWidget {
 
           final userData = snapshot.data?.data() as Map<String, dynamic>?;
 
-          return Container(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -738,7 +739,31 @@ class ProfilePage extends StatelessWidget {
                         ListTile(
                           leading: const Icon(Icons.email_outlined),
                           title: const Text('Email'),
-                          subtitle: Text(currentUser?.email ?? 'Not set'),
+                          subtitle: Text(userData?['email'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.calendar_month_rounded),
+                          title: const Text('Date of Birth'),
+                          subtitle: Text(userData?['dob'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.calendar_today_sharp),
+                          title: const Text('Year of Graduation'),
+                          subtitle: Text(userData?['year'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.book_online_rounded),
+                          title: const Text('SIG'),
+                          subtitle: Text(userData?['sig'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.phone_android_sharp),
+                          title: const Text('Phone Number'),
+                          subtitle: Text(userData?['phone'] ?? 'Not set'),
                         ),
                       ],
                     ),
