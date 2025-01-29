@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tired/screen/signin.dart';
 import 'package:tired/change.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -390,7 +392,7 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode =
+        final isDarkMode =
     (Theme.of(context).brightness == Brightness.dark); // Local check
 
     return SingleChildScrollView(
@@ -658,22 +660,17 @@ class MoreOptionsPage extends StatelessWidget {
         ),
         Divider(color: isDarkMode ? Colors.white : Colors.black),
         ListTile(
-          leading: Icon(
-            Icons.logout,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-          title: Text(
-            'Log Out',
-            style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    const SignInScreen(),
-              ),
-            );
+          leading: const Icon(Icons.logout),  // Optional: adds logout icon
+          title: const Text('Logout'),
+          onTap: () async {
+            await FirebaseAuth.instance.signOut();
+            if (context.mounted) {  // Use context.mounted instead of just mounted
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignInScreen()),
+                      (route) => false
+              );
+            }
           },
         ),
         Divider(color: isDarkMode ? Colors.white : Colors.black),
@@ -689,19 +686,68 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Profile Page',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('Profile'),
       ),
-      body: Center(
-        child: Text(
-          'Profile Page can include: ISTE ID,Club Details,Projects,personal information etc..',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser?.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final userData = snapshot.data?.data() as Map<String, dynamic>?;
+
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const CircleAvatar(
+                  radius: 50,
+                  child: Icon(Icons.person, size: 50),
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.person_outline),
+                          title: const Text('Name'),
+                          subtitle: Text(userData?['name'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.numbers),
+                          title: const Text('Roll Number'),
+                          subtitle: Text(userData?['rollNo'] ?? 'Not set'),
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.email_outlined),
+                          title: const Text('Email'),
+                          subtitle: Text(currentUser?.email ?? 'Not set'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
